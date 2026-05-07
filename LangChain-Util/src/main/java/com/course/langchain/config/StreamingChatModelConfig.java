@@ -1,42 +1,36 @@
 package com.course.langchain.config;
 
+import com.course.langchain.properties.StreamingChatModelProperties;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
-import lombok.Data;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
 
-@Data
 @Configuration
-@ConfigurationProperties(prefix = "model.chat.streaming")
-@ConditionalOnProperty(name = "model.chat.streaming")
+@RequiredArgsConstructor
+@ConditionalOnBean(StreamingChatModelProperties.class)
+@EnableConfigurationProperties(StreamingChatModelProperties.class)
 public class StreamingChatModelConfig {
-    private String baseUrl;
-    private String modelName;
-    private String apiKey;
-    private Double temperature = 0.6;
-    private Integer maxTokens = 2048;
-    private Double frequencyPenalty = 0.0;
-    private Integer timeout = 60;
-    private Boolean logRequest = false;
-    private Boolean logResponse = false;
+
+    private final StreamingChatModelProperties streamingChatModelProperties;
 
     @Bean
     public StreamingChatModel streamingChatModel() {
         return OpenAiStreamingChatModel.builder()
-                .baseUrl(baseUrl)
-                .apiKey(apiKey)
-                .modelName(modelName)
-                .temperature(temperature)
-                .maxTokens(maxTokens)
-                .frequencyPenalty(frequencyPenalty)
-                .timeout(Duration.ofSeconds(timeout))
-                .logRequests(logRequest)
-                .logResponses(logResponse)
+                .baseUrl(streamingChatModelProperties.getBaseUrl())
+                .apiKey(streamingChatModelProperties.getApiKey())
+                .modelName(streamingChatModelProperties.getModelName())
+                .temperature(streamingChatModelProperties.getTemperature())
+                .maxTokens(streamingChatModelProperties.getMaxTokens())
+                .frequencyPenalty(streamingChatModelProperties.getFrequencyPenalty())
+                .timeout(Duration.ofSeconds(streamingChatModelProperties.getTimeout()))
+                .logRequests(streamingChatModelProperties.getLogRequest())
+                .logResponses(streamingChatModelProperties.getLogResponse())
                 .build();
     }
 }

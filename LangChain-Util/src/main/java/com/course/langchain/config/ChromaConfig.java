@@ -1,35 +1,35 @@
 package com.course.langchain.config;
 
+import com.course.langchain.properties.ChromaProperties;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.chroma.ChromaEmbeddingStore;
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Slf4j
-@Data
 @Configuration
-@ConditionalOnProperty(name = "model.vector.chroma", havingValue = "baseUrl")
-@ConfigurationProperties(prefix = "model.vector.chroma")
+@RequiredArgsConstructor
+@ConditionalOnBean(ChromaProperties.class)
+@EnableConfigurationProperties(ChromaProperties.class)
 public class ChromaConfig {
 
-    private String baseUrl;
-    private String collectionName;
-    private int timeout = 30;
+    private final ChromaProperties chromaProperties;
 
     @Bean
     public EmbeddingStore<TextSegment> chromaEmbeddingStore() {
         log.info("正在初始化 Chroma 向量存储 - URL: {}, Collection: {}, Timeout: {}s",
-                baseUrl, collectionName, timeout);
+                chromaProperties.getBaseUrl(), chromaProperties.getCollectionName(), chromaProperties.getTimeout());
         try {
             ChromaEmbeddingStore store = ChromaEmbeddingStore.builder()
-                    .baseUrl(baseUrl)
-                    .collectionName(collectionName != null && !collectionName.trim().isEmpty() ? collectionName : "default")
-                    .timeout(java.time.Duration.ofSeconds(timeout))
+                    .baseUrl(chromaProperties.getBaseUrl())
+                    .collectionName(chromaProperties.getCollectionName() != null && !chromaProperties.getCollectionName().trim().isEmpty() ? chromaProperties.getCollectionName() : "default")
+                    .timeout(java.time.Duration.ofSeconds(chromaProperties.getTimeout()))
                     .logRequests(true)
                     .logResponses(true)
                     .build();
