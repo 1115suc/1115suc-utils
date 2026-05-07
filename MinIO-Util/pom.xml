@@ -5,14 +5,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.course</groupId>
-    <artifactId>MinIO-util</artifactId>
+    <artifactId>MinIO-Util</artifactId>
     <version>1.0-SNAPSHOT</version>
+
+    <description>MinIO 文件上传工具</description>
 
     <properties>
         <maven.compiler.source>23</maven.compiler.source>
         <maven.compiler.target>23</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <minio.version>8.5.10</minio.version>
+        <s3.version>2.25.0</s3.version>
         <spring.version>3.3.7</spring.version>
         <hutool.version>5.8.43</hutool.version>
         <lombok.version>1.18.34</lombok.version>
@@ -24,6 +27,12 @@
             <groupId>io.minio</groupId>
             <artifactId>minio</artifactId>
             <version>${minio.version}</version>
+        </dependency>
+        <!-- AWS S3 SDK v2，专门用于分片上传（MinIO 完全兼容 S3 协议） -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>${s3.version}</version>
         </dependency>
 
         <!--Spring 相关依赖-->
@@ -64,18 +73,4 @@
             <version>${lombok.version}</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>10</source>
-                    <target>10</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
 </project>

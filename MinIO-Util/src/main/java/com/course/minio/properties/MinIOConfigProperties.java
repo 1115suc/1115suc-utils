@@ -60,4 +60,24 @@ public class MinIOConfigProperties {
      * 读取超时时间（毫秒）。默认为 60 秒。
      */
     private long readTimeout = 60000;
+
+    /**
+     * 分片上传阈值（字节），超过此大小使用分片上传。默认 10MB
+     */
+    private long multipartThreshold = 10 * 1024 * 1024L;
+
+    /**
+     * 每个分片大小（字节）。默认 5MB（MinIO最小分片限制）
+     */
+    private long multipartChunkSize = 5 * 1024 * 1024L;
+
+    /**
+     * 分片上传并发线程数
+     */
+    private int multipartThreadPoolSize = 4;
+
+    /**
+     * 预签名 URL 有效期（秒）。默认 7 天
+     */
+    private int presignedUrlExpiry = 7 * 24 * 3600;
 }

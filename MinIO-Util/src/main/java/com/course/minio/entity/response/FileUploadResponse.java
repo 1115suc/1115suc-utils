@@ -1,4 +1,4 @@
-package com.course.minio.entity.dto;
+package com.course.minio.entity.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,12 +16,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FileUploadResponse implements Serializable {
-
-    /**
-     * 唯一文件标识（对象名称）
-     */
-    private String fileId;
-
     /**
      * 存储的文件名
      */
