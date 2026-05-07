@@ -13,7 +13,7 @@ import jakarta.validation.constraints.Pattern;
 @Data
 @Validated
 @ConfigurationProperties(prefix = "minio")
-@ConditionalOnProperty(prefix = "minio", value = "endpoint")
+@ConditionalOnProperty(prefix = "minio")
 public class MinIOConfigProperties {
 
     /**

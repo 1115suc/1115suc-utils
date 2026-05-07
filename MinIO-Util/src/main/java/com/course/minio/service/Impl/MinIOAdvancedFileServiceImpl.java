@@ -17,10 +17,9 @@ import com.course.minio.util.MinioFileStorageUtil;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.http.Method;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -29,13 +28,10 @@ import software.amazon.awssdk.services.s3.presigner.model.UploadPartPresignReque
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,6 +42,7 @@ import static java.io.File.separator;
 
 @Slf4j
 @Service
+@ConditionalOnBean(MinIOConfigProperties.class)
 public class MinIOAdvancedFileServiceImpl implements MinIOAdvancedFileService {
 
     /**

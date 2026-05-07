@@ -8,7 +8,6 @@ import cn.hutool.crypto.SecureUtil;
 import com.course.minio.entity.enums.PathStrategy;
 import com.course.minio.entity.request.FileUploadRequest;
 import com.course.minio.entity.request.ImageUploadRequest;
-import com.course.minio.entity.request.MultipartUploadInitRequest;
 import com.course.minio.entity.response.FileUploadResponse;
 import com.course.minio.entity.enums.MinioFileTypeEnum;
 import com.course.minio.entity.enums.MinioResponseCodeEnum;
@@ -22,6 +21,8 @@ import io.minio.messages.DeleteError;
 import io.minio.messages.DeleteObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@ConditionalOnBean(MinIOConfigProperties.class)
 public class MinIOBasicFileServiceImpl implements MinIOBasicFileService {
 
     private static final String SEPARATOR = "/";

@@ -5,6 +5,7 @@ import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -18,6 +19,7 @@ import java.net.URI;
 @Slf4j
 @Configuration
 @EnableConfigurationProperties(MinIOConfigProperties.class)
+@ComponentScan(basePackages = "com.course.minio")
 public class MinIOConfig {
 
     @Bean
