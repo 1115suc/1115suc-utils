@@ -1,4 +1,4 @@
-package com.course.langchain.config;
+package com.course.langchain.config.memoryConfig;
 
 import com.course.langchain.handler.MongoMemoryStore;
 import dev.langchain4j.memory.ChatMemory;

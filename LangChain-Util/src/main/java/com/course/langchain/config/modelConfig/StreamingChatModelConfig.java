@@ -1,6 +1,6 @@
-package com.course.langchain.config;
+package com.course.langchain.config.modelConfig;
 
-import com.course.langchain.properties.StreamingChatModelProperties;
+import com.course.langchain.properties.modelProperties.StreamingChatModelProperties;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +25,7 @@ public class StreamingChatModelConfig {
                 .baseUrl(streamingChatModelProperties.getBaseUrl())
                 .apiKey(streamingChatModelProperties.getApiKey())
                 .modelName(streamingChatModelProperties.getModelName())
+                .topP(streamingChatModelProperties.getTopP())
                 .temperature(streamingChatModelProperties.getTemperature())
                 .maxTokens(streamingChatModelProperties.getMaxTokens())
                 .frequencyPenalty(streamingChatModelProperties.getFrequencyPenalty())

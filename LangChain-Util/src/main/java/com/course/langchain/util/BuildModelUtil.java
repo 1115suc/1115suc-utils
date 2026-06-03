@@ -1,6 +1,5 @@
 package com.course.langchain.util;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.ObjectUtil;
 import com.course.langchain.entity.dao.UserAIDao;
 import dev.langchain4j.model.openai.OpenAiChatModel;

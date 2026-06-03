@@ -100,9 +100,6 @@ public class MongoMemoryStore implements ChatMemoryStore {
     // ----------------------------------------------------------------
     // 类型转换：Langchain4j ChatMessage → ChatMessageDocument
     // ----------------------------------------------------------------
-    /**
-     * 转换时优先复用旧时间，无匹配才使用当前时间
-     */
     private ChatMessageDocument toChatMessageDocument(
             ChatMessage message, Map<String, Deque<LocalDateTime>> existingTimeMap) {
 

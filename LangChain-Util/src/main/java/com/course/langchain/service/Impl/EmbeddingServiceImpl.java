@@ -1,6 +1,6 @@
 package com.course.langchain.service.Impl;
 
-import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.course.langchain.constants.CommonConstants;
 import com.course.langchain.entity.dao.FileEmbeddingDao;
@@ -16,13 +16,17 @@ import dev.langchain4j.data.document.splitter.DocumentSplitters;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingStore;
+import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static dev.langchain4j.store.embedding.filter.MetadataFilterBuilder.metadataKey;
+
 
 @Slf4j
 @Service
@@ -49,7 +53,8 @@ public class EmbeddingServiceImpl implements EmbeddingService {
             document = FileSystemDocumentLoader.loadDocument(file.getFilePath(), documentParser);
         } catch (Exception e) {
             String msg = String.format("[RAG] 目的路径 %s 文件加载失败", file.getFilePath());
-            throw new RuntimeException(msg);
+            log.error(msg, e);
+            throw new RuntimeException(msg, e);
         }
 
         if (!ingestDocument(document, file)) {
@@ -72,8 +77,9 @@ public class EmbeddingServiceImpl implements EmbeddingService {
         try {
             document = UrlDocumentLoader.load(file.getFileUrl(), documentParser);
         } catch (Exception e) {
-            String msg = String.format("[RAG] 目的路径 %s 文件加载失败", file.getFilePath());
-            throw new RuntimeException(msg);
+            String msg = String.format("[RAG] 目的地址 %s 文件加载失败", file.getFileUrl());
+            log.error(msg, e);
+            throw new RuntimeException(msg, e);
         }
 
         if (!ingestDocument(document, file)) {
@@ -89,8 +95,11 @@ public class EmbeddingServiceImpl implements EmbeddingService {
     // ===========================================================================================
 
     private Boolean ingestDocument(Document document, FileEmbeddingDao file) {
+        // 入库前校验：同一 fileId 已存在则直接拒绝，避免重复入库
+        assertFileIdNotExists(file.getFileId());
+
         if (StrUtil.isBlank(document.text())) {
-            String msg = String.format("[RAG] 文件 %s 内容为空，跳过向量化", file.getFileName());
+            log.warn("[RAG] 文件 {} 内容为空，跳过向量化", file.getFileName());
             return CommonConstants.error;
         }
 
@@ -98,15 +107,13 @@ public class EmbeddingServiceImpl implements EmbeddingService {
         DocumentSplitter splitter = DocumentSplitters.recursive(CHUNK_SIZE, CHUNK_OVERLAP);
         List<TextSegment> segments = splitter.split(document);
 
-        if (ArrayUtil.isEmpty(segments)) {
+        if (CollUtil.isEmpty(segments)) {
             log.warn("[RAG] 文件 {} 分段结果为空，跳过", file.getFileName());
             return CommonConstants.error;
         }
 
-        // 构建带 metadata 的分段 + 生成 embedding
+        // 构建带 metadata 的有效分段
         List<TextSegment> finalSegments = new ArrayList<>(segments.size());
-        List<Embedding> embeddings = new ArrayList<>(segments.size());
-
         for (int i = 0; i < segments.size(); i++) {
             TextSegment segment = segments.get(i);
 
@@ -118,21 +125,9 @@ public class EmbeddingServiceImpl implements EmbeddingService {
             //  Chroma metadata：值支持 String / int / float / boolean
             Metadata metadata = new Metadata();
             metadata.put("fileId", file.getFileId());
-            metadata.put("index", String.valueOf(i));
+            metadata.put("index", i);
 
-            TextSegment newSegment = TextSegment.from(segment.text(), metadata);
-            Embedding embedding = embeddingModel.embed(newSegment).content();
-
-            if (i == 0) {
-                log.info("[RAG] 模型输出向量维度: {}", embedding.vector().length);
-            }
-            if (embedding.vector().length == 0) {
-                log.error("[RAG] 第 {} 段生成的向量维度为 0，跳过", i);
-                continue;
-            }
-
-            finalSegments.add(newSegment);
-            embeddings.add(embedding);
+            finalSegments.add(TextSegment.from(segment.text(), metadata));
         }
 
         if (finalSegments.isEmpty()) {
@@ -140,11 +135,36 @@ public class EmbeddingServiceImpl implements EmbeddingService {
             return CommonConstants.error;
         }
 
+        // 批量生成 embedding（一次远程请求，避免逐段调用）
+        List<Embedding> embeddings = embeddingModel.embedAll(finalSegments).content();
+        log.info("[RAG] 模型输出向量维度: {}", embeddings.get(0).vector().length);
+
         // 批量存入 Chroma
         embeddingStore.addAll(embeddings, finalSegments);
 
         log.info("[RAG] 文件 {} 向量化完成, 有效chunks={}",
                 file.getFileName(), finalSegments.size());
         return CommonConstants.success;
+    }
+
+    /**
+     * 校验 fileId 是否已入库，存在则抛出异常。
+     * 通过 metadata 过滤 + minScore=0 检索任意一条匹配记录来判断存在性，
+     * queryEmbedding 仅用于满足检索接口要求，不影响过滤结果。
+     */
+    private void assertFileIdNotExists(String fileId) {
+        Embedding probe = embeddingModel.embed(fileId).content();
+        EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
+                .queryEmbedding(probe)
+                .filter(metadataKey("fileId").isEqualTo(fileId))
+                .maxResults(1)
+                .minScore(0.0)
+                .build();
+
+        if (CollUtil.isNotEmpty(embeddingStore.search(request).matches())) {
+            String msg = String.format("[RAG] fileId %s 已存在，禁止重复入库", fileId);
+            log.warn(msg);
+            throw new RuntimeException(msg);
+        }
     }
 }

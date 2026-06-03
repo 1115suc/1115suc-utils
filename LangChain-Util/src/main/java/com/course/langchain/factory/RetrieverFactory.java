@@ -1,6 +1,6 @@
 package com.course.langchain.factory;
 
-import com.course.langchain.config.ChromaConfig;
+import com.course.langchain.config.vectorDBConfig.ChromaConfig;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;

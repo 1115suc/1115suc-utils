@@ -1,11 +1,10 @@
-package com.course.langchain.config;
+package com.course.langchain.config.modelConfig;
 
-import com.course.langchain.properties.EmbeddingModelProperties;
+import com.course.langchain.properties.modelProperties.EmbeddingModelProperties;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

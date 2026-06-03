@@ -7,10 +7,10 @@ public class UserAIDao {
     private String baseUrl;
     private String modelName;
     private String apiKey;
-    private Double temperature;
     private Double topP;
-    private Integer maxTokens;
+    private Double temperature;
     private Double frequencyPenalty;
+    private Integer maxTokens;
     private Integer timeout;
     private Boolean logRequest = false;
     private Boolean logResponse = false;
